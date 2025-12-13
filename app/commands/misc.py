@@ -24,7 +24,7 @@ class Misc(commands.Cog):
         embed.set_footer(text=f"Privilix | {now}")
         await ctx.reply(embed=embed)
 
-    @commands.command(name="help", help="Get a list of all my commands.")
+    @commands.hybrid_command(name="help", help="Get a list of all my commands.")
     @commands.guild_only()
     async def help_command(self, ctx, command: str = None):
         prefix = await fetch_prefix(ctx.guild.id)
@@ -42,8 +42,9 @@ class Misc(commands.Cog):
             aliases = []
             for alias in cmd.aliases:
               aliases.append(f"{prefix}{alias}")
-            others = f"> `{", ".join(aliases)}`"
-            embed.add_field(name = "Aliases", value = others)
+            if aliases:
+              others = f"> `{", ".join(aliases)}`"
+              embed.add_field(name = "Aliases", value = others)
             params = []
             for name, param in cmd.clean_params.items():
                 if param.default is param.empty:

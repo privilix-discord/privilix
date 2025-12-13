@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 from app.core.bot import Privilix
 from tortoise import Tortoise
 from app.services.database.config import TORTOISE_ORM
-from app.helpers.logging import logger
+
 
 async def init_db():
-  await Tortoise.init(config = TORTOISE_ORM)
+    await Tortoise.init(config=TORTOISE_ORM)
 
 
 load_dotenv()
