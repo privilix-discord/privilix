@@ -3,6 +3,8 @@ from app.services.database.models.guild_settings import GuildSettings
 from app.services.database.models.mod_logs import ModLogs
 from app.services.database.models.feature_settings import FeatureSettings
 
+from collections import Counter
+
 
 async def get_or_create_guild(guild_id: int, name: str) -> Guild:
     guild, created = await Guild.get_or_create(
@@ -21,7 +23,6 @@ async def get_or_create_guild(guild_id: int, name: str) -> Guild:
 
 async def delete_guild_data(guild_id: int) -> None:
     await Guild.filter(guild_id=str(guild_id)).delete()
-
 
 
 async def set_prefix(guild_id: int, new_prefix: str) -> None:
@@ -46,12 +47,10 @@ async def insert_modlog(
     return case_id
 
 
-
 async def set_modlog_channel(guild_id: int, channel_id: int) -> None:
     settings = await GuildSettings.get(guild_id=str(guild_id))
     settings.modlog_channelid = str(channel_id)
     await settings.save()
-
 
 
 async def set_suggestion_channel(guild_id: int, channel_id: int) -> None:
@@ -107,6 +106,7 @@ async def fetch_warnings(guild_id: int, user_id: int) -> list:
                 "action": log.action,
                 "reason": log.reason,
                 "date": log.timestamp.isoformat(),
+                "resolved": log.resolved,
             }
         )
     return results
@@ -122,3 +122,19 @@ async def resolve_case(case_id: int):
     logs = await ModLogs.get(case_id=case_id)
     logs.resolved = True
     await logs.save()
+
+
+async def mod_stats(guild_id: int, mod_id: int):
+    logs = await ModLogs.filter(guild_id=str(guild_id), mod_id=str(mod_id)).values(
+        "action"
+    )
+
+    if not logs:
+        return {"total_actions": 0, "actions": {}}
+
+    action_counter = Counter(log["action"] for log in logs)
+
+    return {
+        "total_actions": sum(action_counter.values()),
+        "actions": dict(action_counter),
+    }

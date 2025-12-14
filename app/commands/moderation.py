@@ -292,10 +292,6 @@ class Moderation(commands.Cog):
             case_id = await insert_modlog(
                 ctx.guild.id, target.id, ctx.author.id, "warn", reason
             )
-            chnl_id = self.bot.guild_settings_cache[ctx.guild.id]["appeals_channelid"]
-            appeal_view = None
-            if chnl_id:
-                appeal_view = AppealDMView(self.bot, ctx.guild.id, case_id, "ban")
         except Exception as e:
             await ctx.reply(
                 embed=error_embed("Something went wrong."),
@@ -306,9 +302,15 @@ class Moderation(commands.Cog):
 
         try:
             try:
+                chnl_id = self.bot.guild_settings_cache[ctx.guild.id][
+                    "appeals_channelid"
+                ]
+                appeal_view = None
+                if chnl_id:
+                    appeal_view = AppealDMView(self.bot, ctx.guild.id, case_id, "ban")
                 await target.send(
                     embed=dm_embed(ctx.guild, "You were warned", "warn", reason),
-                    view=view,
+                    view=appeal_view,
                 )
             except Exception as e:
                 logger.error(f"warn dm failed {e}")

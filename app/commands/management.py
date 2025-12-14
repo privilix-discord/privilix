@@ -1,11 +1,16 @@
 import discord
 from discord.ext import commands
+
 from app.ui.embeds import error_embed, success_embed
+from app.core.constants.colors import BLUE
+from app.core.constants.emojis import HAMMER
 from app.helpers.logging import logger
 from app.ui.views.warningView import WarningViewer
 from app.ui.views.modlogView import Modlogs
-from app.services.database.queries import fetch_modlogs, fetch_warnings
+from app.services.database.queries import fetch_modlogs, fetch_warnings, mod_stats
 from app.helpers.time_converter import time_converter
+
+from datetime import datetime
 from typing import Optional
 
 
@@ -178,7 +183,9 @@ class Management(commands.Cog):
             mention_author=False,
         )
 
-    @commands.command(name="removerole", aliases=["rr"], help="Remove a role from a user")
+    @commands.command(
+        name="removerole", aliases=["rr"], help="Remove a role from a user"
+    )
     @commands.guild_only()
     @commands.has_permissions(manage_roles=True)
     async def _removerole(
@@ -195,35 +202,41 @@ class Management(commands.Cog):
                 mention_author=False,
             )
             return
-    
+
         if role.position >= ctx.guild.me.top_role.position:
             await ctx.reply(
                 embed=error_embed("That role is higher than my highest role."),
                 mention_author=False,
             )
             return
-    
-        if target.top_role >= ctx.author.top_role and ctx.author.id != ctx.guild.owner_id:
+
+        if (
+            target.top_role >= ctx.author.top_role
+            and ctx.author.id != ctx.guild.owner_id
+        ):
             await ctx.reply(
                 embed=error_embed("You can’t modify roles for this member."),
                 mention_author=False,
             )
             return
-    
-        if role.position >= ctx.author.top_role.position and ctx.author.id != ctx.guild.owner_id:
+
+        if (
+            role.position >= ctx.author.top_role.position
+            and ctx.author.id != ctx.guild.owner_id
+        ):
             await ctx.reply(
                 embed=error_embed("You can’t remove a role higher than your own."),
                 mention_author=False,
             )
             return
-    
+
         if role not in target.roles:
             await ctx.reply(
                 embed=error_embed(f"{target.mention} doesn’t have that role."),
                 mention_author=False,
             )
             return
-    
+
         try:
             await target.remove_roles(role, reason=f"{ctx.author}: {reason}")
         except Exception as e:
@@ -233,11 +246,54 @@ class Management(commands.Cog):
                 mention_author=False,
             )
             return
-    
+
         await ctx.reply(
             embed=success_embed(f"Removed **{role.name}** from {target.mention}."),
             mention_author=False,
         )
+
+    @commands.command(
+        name="modstats", aliases=["ms"], help="Get moderation stats of a mod"
+    )
+    @commands.guild_only()
+    @commands.has_permissions(view_audit_log=True)
+    async def _modstats(
+        self, ctx: commands.Context, mod: Optional[discord.Member] = None
+    ):
+        mod = mod or ctx.author
+        stats = await mod_stats(ctx.guild.id, mod.id)
+
+        if stats["total_actions"] == 0:
+            await ctx.reply(
+                embed=error_embed(
+                    f"No moderation actions found for **{mod.display_name}**."
+                )
+            )
+            return
+          
+        embed = discord.Embed(
+            title=f"{HAMMER} Moderator Statistics",
+            description=f"-# Stats for {mod.display_name}",
+            color=BLUE
+        )
+
+        embed.add_field(
+            name="Total Actions",
+            value=str(stats["total_actions"]),
+            inline=False
+        )
+
+        for action, count in stats["actions"].items():
+            embed.add_field(
+                name=action.capitalize(),
+                value=str(count),
+                inline=True
+            )
+
+        embed.set_thumbnail(url=mod.display_avatar.url)
+        embed.set_footer(text = datetime.now().strftime("Today at %H:%M"))
+        await ctx.reply(embed=embed)
+
 
 
 async def setup(bot):

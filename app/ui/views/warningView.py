@@ -28,7 +28,7 @@ class WarningViewer(discord.ui.View):
 
         embed.add_field(name="Moderator", value=f"<@{warn['moderator']}>", inline=True)
 
-        embed.add_field(name="Resolved", value = "Yes" if log['resolved'] else "No")
+        embed.add_field(name="Resolved", value = "Yes" if warn['resolved'] else "No")
 
         embed.add_field(
             name="Issued", value=self.format_datetime(warn["date"]), inline=True
