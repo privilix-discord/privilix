@@ -439,9 +439,7 @@ class Moderation(commands.Cog):
             return
 
         try:
-            deleted = await ctx.channel.purge(limit=count)
-            embed = success_embed(f"Deleted {len(deleted)} messages.")
-            await ctx.send(embed=embed)
+            await ctx.channel.purge(limit=count)
         except Exception as e:
             await ctx.reply(embed=error_embed("Something went wrong."))
             logger.error(f"Purge command failed: {e}")
