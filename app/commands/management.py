@@ -3,7 +3,7 @@ from discord.ext import commands
 
 from app.ui.embeds import error_embed, success_embed
 from app.core.constants.colors import BLUE
-from app.core.constants.emojis import HAMMER
+from app.core.constants.emojis import HAMMER, CROSS
 from app.helpers.logging import logger
 from app.ui.views.warningView import WarningViewer
 from app.ui.views.modlogView import Modlogs
@@ -12,6 +12,7 @@ from app.helpers.time_converter import time_converter
 
 from datetime import datetime
 from typing import Optional
+import asyncio
 
 
 class Management(commands.Cog):
@@ -270,30 +271,76 @@ class Management(commands.Cog):
                 )
             )
             return
-          
+
         embed = discord.Embed(
             title=f"{HAMMER} Moderator Statistics",
             description=f"-# Stats for {mod.display_name}",
-            color=BLUE
+            color=BLUE,
         )
 
         embed.add_field(
-            name="Total Actions",
-            value=str(stats["total_actions"]),
-            inline=False
+            name="Total Actions", value=str(stats["total_actions"]), inline=False
         )
 
         for action, count in stats["actions"].items():
-            embed.add_field(
-                name=action.capitalize(),
-                value=str(count),
-                inline=True
-            )
+            embed.add_field(name=action.capitalize(), value=str(count), inline=True)
 
         embed.set_thumbnail(url=mod.display_avatar.url)
-        embed.set_footer(text = datetime.now().strftime("Today at %H:%M"))
+        embed.set_footer(text=datetime.now().strftime("Today at %H:%M"))
         await ctx.reply(embed=embed)
 
+    @commands.command(
+        name="massrole",
+        aliases=["mr"],
+        help="Add or remove a role to all human members.",
+    )
+    @commands.guild_only()
+    @commands.has_permissions(manage_roles=True)
+    async def _massrole(self, ctx: commands.Context, action: str, role: discord.Role):
+        if not ctx.guild.me.guild_permissions.manage_roles:
+            await ctx.reply(
+                embed=error_embed("Missing permission to manage roles."),
+                mention_author=False,
+            )
+            return
+
+        if role >= ctx.guild.me.top_role:
+            await ctx.reply(embed=error_embed("That role is higher than my top role"))
+
+        action = action.lower()
+
+        if not action in ("add", "remove"):
+            embed = error_embed(
+                "**Usage:** `.massrole add @role` or `.massrole remove @role`",
+                title=f"{CROSS} Wrong Usage",
+            )
+            await ctx.reply(embed=embed)
+            return
+
+        success = 0
+        failed = 0
+
+        for member in ctx.guild.members:
+            if member.bot:
+                continue
+            try:
+                if action == "add" and role not in member.roles:
+                    await member.add_roles(role, reason=f"Massrole by {ctx.author}")
+                    success += 1
+
+                elif action == "remove" and role in member.roles:
+                    await member.remove_roles(role, reason=f"Massrole by {ctx.author}")
+                    success += 1
+
+                await asyncio.sleep(0.3)
+            except Exception:
+                failed += 1
+
+        await ctx.reply(
+            embed=success_embed(
+                f"The role {role.mention} has been {"added to" if action == "add" else "removed from"} {success}/{success + failed} members"
+            )
+        )
 
 
 async def setup(bot):

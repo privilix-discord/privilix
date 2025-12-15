@@ -7,6 +7,7 @@ from datetime import datetime
 from app.core.constants.emojis import LOGO
 from app.core.constants.colors import BLUE
 from app.ui.views.helpView import HelpView
+from app.ui.embeds import success_embed
 
 
 class Misc(commands.Cog):
@@ -39,6 +40,7 @@ class Misc(commands.Cog):
                 inline=False,
             )
             aliases = []
+            aliases.append(f"{prefix}{command}")
             for alias in cmd.aliases:
               aliases.append(f"{prefix}{alias}")
             if aliases:
@@ -51,7 +53,7 @@ class Misc(commands.Cog):
                 else:
                     params.append(f"[{name}]")
 
-            usage = f"> `.{command} {' '.join(params)}`"
+            usage = f"> `{prefix}{command} {' '.join(params)}`"
             embed.add_field(name="Usage", value=usage)
             return await ctx.reply(embed=embed)
         view = HelpView(self.bot, prefix)
@@ -137,6 +139,20 @@ class Misc(commands.Cog):
         )
 
         await ctx.reply(embed=embed, view=view)
+
+    @commands.command(name = "feedback", aliases = ["review"], help = "Give a feedback/review to help us improve Privilix")
+    @commands.guild_only()
+    async def _feedback(self, ctx: commands.Context, *,message:str):
+      channel = await self.bot.fetch_channel(1450187362662354964)
+      
+      embed = discord.Embed(
+        color = BLUE,
+        title = f"Feedback from {ctx.author}",
+        description = f"> {message}"
+        )
+      embed.set_footer(text = f"Sent from {ctx.guild.name} | {datetime.now().strftime("Today at %H:%M")}")
+      await channel.send(embed = embed)
+      await ctx.reply(embed = success_embed("Your feedback has been submitted!!"))
 
 
 async def setup(bot):

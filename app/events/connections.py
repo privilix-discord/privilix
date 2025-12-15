@@ -14,7 +14,7 @@ class Connection(commands.Cog):
         for guild in self.bot.guilds:
           await get_or_create_guild(guild.id, guild.name)
         await self.bot.change_presence(
-            activity=discord.Activity(type=discord.ActivityType.watching, name="/hi | privilix.xyz")
+            activity=discord.Activity(type=discord.ActivityType.watching, name="/help • privilix.xyz")
         )
         logger.info(f"Logged in as {self.bot.user}")
 
