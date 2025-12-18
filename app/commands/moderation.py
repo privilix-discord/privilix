@@ -92,14 +92,6 @@ class Moderation(commands.Cog):
             )
             return
 
-        try:
-            await target.ban(reason=f"{ctx.author.name}: {reason}")
-        except Exception:
-            await ctx.reply(
-                embed=error_embed("Something went wrong."),
-            )
-            return
-
         embed = success_embed(f"**{target.name} banned.**")
 
         try:
@@ -131,6 +123,14 @@ class Moderation(commands.Cog):
 
         except Exception as e:
             logger.error(f"Ban logging failed: {e}")
+
+        try:
+            await target.ban(reason=f"{ctx.author.name}: {reason}")
+        except Exception:
+            await ctx.reply(
+                embed=error_embed("Something went wrong."),
+            )
+            return
 
         await ctx.reply(
             embed=embed,
@@ -307,7 +307,7 @@ class Moderation(commands.Cog):
                 ]
                 appeal_view = None
                 if chnl_id:
-                    appeal_view = AppealDMView(self.bot, ctx.guild.id, case_id, "ban")
+                    appeal_view = AppealDMView(self.bot, ctx.guild.id, case_id, "warn")
                 await target.send(
                     embed=dm_embed(ctx.guild, "You were warned", "warn", reason),
                     view=appeal_view,

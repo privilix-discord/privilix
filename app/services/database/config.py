@@ -1,10 +1,8 @@
-import os
-from dotenv import load_dotenv
-load_dotenv()
+from app.core.config import config
 
 
 TORTOISE_ORM = {
-    "connections": {"default": os.getenv('DB_URL')},
+    "connections": {"default": config.db_url},
     "apps": {
         "models": {
             "models": [

@@ -1,7 +1,6 @@
-import os
 import asyncio
-from dotenv import load_dotenv
 from app.core.bot import Privilix
+from app.core.config import config
 from tortoise import Tortoise
 from app.services.database.config import TORTOISE_ORM
 
@@ -9,12 +8,7 @@ from app.services.database.config import TORTOISE_ORM
 async def init_db():
     await Tortoise.init(config=TORTOISE_ORM)
 
-
-load_dotenv()
-
-TOKEN = os.getenv("BOT_TOKEN")
-if not TOKEN:
-    raise ValueError("Bot token missing in .env")
+TOKEN = config.bot_token
 
 bot = Privilix()
 

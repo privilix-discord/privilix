@@ -1,12 +1,10 @@
 import aiohttp
 from discord.ext import commands, tasks
-import os
-from dotenv import load_dotenv
+from app.core.config import config
 from app.helpers.logging import logger
 
 
-load_dotenv()
-TOPGG_TOKEN = os.getenv('TOPGG_TOKEN')
+TOPGG_TOKEN = config.topgg_token
 BOT_ID = "1133741199505760266"
 
 
@@ -19,6 +17,8 @@ class TopGG(commands.Cog):
         self.update_topgg.cancel()
 
     async def post_stats(self):
+        if not TOPGG_TOKEN:
+          return
         url = f"https://top.gg/api/bots/{BOT_ID}/stats"
         payload = {"server_count": len(self.bot.guilds)}
 
