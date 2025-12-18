@@ -2,6 +2,7 @@ import discord
 from discord import ui
 from app.core.constants.emojis import HAMMER, BOX, STAR, SHIELD, GEAR
 from app.core.constants.colors import BLUE
+from app.core.constants.others import INVITE_LINK
 
 EMOJIS = {
     "Moderation": "🛡️",
@@ -30,7 +31,7 @@ class HelpView(ui.View):
             ui.Button(
                 label="Invite",
                 style=discord.ButtonStyle.link,
-                url="https://discord.com/oauth2/authorize?client_id=1133741199505760266&permissions=8&integration_type=0&scope=bot",
+                url=INVITE_LINK,
             )
         )
         self.add_item(
@@ -64,6 +65,7 @@ class HelpSelect(ui.Select):
                 "hi",
                 "owner",
                 "topgg",
+                "mention",
             ]:
                 continue
 

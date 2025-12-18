@@ -8,6 +8,7 @@ from app.core.constants.emojis import LOGO
 from app.core.constants.colors import BLUE
 from app.ui.views.helpView import HelpView
 from app.ui.embeds import success_embed
+from app.core.constants.others import INVITE_LINK
 
 
 class Misc(commands.Cog):
@@ -92,7 +93,7 @@ class Misc(commands.Cog):
         link_btn = ui.Button(
             label="Invite",
             style=discord.ButtonStyle.link,
-            url="https://discord.com/oauth2/authorize?client_id=1133741199505760266&permissions=8&integration_type=0&scope=bot",
+            url=INVITE_LINK,
         )
         view.add_item(link_btn)
         support_btn = ui.Button(
