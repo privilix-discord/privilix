@@ -1,8 +1,8 @@
 import discord
 from discord import ui
 
-from app.core.constants.colors import BLUE
-from app.services.database.queries import (
+from app.helpers.constants import BLUE
+from app.database.queries import (
     set_modlog_channel,
     set_appeal_channel,
 )

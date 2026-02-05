@@ -1,8 +1,8 @@
 import discord
 from discord import ui, TextStyle
 from app.ui.embeds import error_embed, success_embed
-from app.core.constants.colors import BLUE
-from app.core.constants.emojis import HAMMER
+from app.helpers.constants import BLUE
+from app.helpers.constants import HAMMER
 from datetime import datetime
 from app.ui.views.appeals.ban_appeals import BanAppealView
 from app.ui.views.appeals.warn_appeals import WarnAppealView

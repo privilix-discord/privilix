@@ -1,7 +1,7 @@
 import discord
 from datetime import datetime
-from app.services.database.queries import delete_modlogs, edit_modlogs
-from app.core.constants.colors import BLUE
+from app.database.queries import delete_modlogs, edit_modlogs
+from app.helpers.constants import BLUE
 
 
 class Modlogs(discord.ui.View):

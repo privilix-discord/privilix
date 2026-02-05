@@ -1,8 +1,8 @@
 import discord
 from discord import ui
-from app.core.constants.emojis import HAMMER, BOX, STAR, SHIELD, GEAR
-from app.core.constants.colors import BLUE
-from app.core.constants.others import INVITE_LINK
+from app.helpers.constants import HAMMER, BOX, STAR, SHIELD, GEAR
+from app.helpers.constants import BLUE
+from app.helpers.constants import INVITE_LINK
 
 EMOJIS = {
     "Moderation": "🛡️",

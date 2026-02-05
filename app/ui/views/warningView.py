@@ -1,7 +1,7 @@
 import discord
-from app.services.database.queries import edit_modlogs, delete_modlogs
+from app.database.queries import edit_modlogs, delete_modlogs
 from datetime import datetime
-from app.core.constants.colors import BLUE
+from app.helpers.constants import BLUE
 
 
 class WarningViewer(discord.ui.View):
