@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from app.helpers.logging import logger
-from app.services.database.queries import (
+from app.database.queries import (
     set_prefix,
     set_modlog_channel,
     set_suggestion_channel,

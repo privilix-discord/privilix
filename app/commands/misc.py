@@ -147,9 +147,7 @@ class Misc(commands.Cog):
         embed = discord.Embed(
             color=BLUE, title=f"Feedback from {ctx.author}", description=f"> {message}"
         )
-        embed.set_footer(
-            text=f"Sent from {ctx.guild.name} "
-        )
+        embed.set_footer(text=f"Sent from {ctx.guild.name} ")
         await channel.send(embed=embed)
         await ctx.reply(embed=success_embed("Your feedback has been submitted!!"))
 

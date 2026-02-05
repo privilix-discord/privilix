@@ -1,7 +1,7 @@
 import discord
 from datetime import datetime, timezone
-from app.core.constants.colors import RED, YELLOW, ORANGE, GREEN
-from app.core.constants.emojis import CROSS, CHECK, INFO
+from app.helpers.constants import RED, YELLOW, ORANGE, GREEN
+from app.helpers.constants import CROSS, CHECK, INFO
 from typing import Optional
 
 

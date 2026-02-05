@@ -2,13 +2,13 @@ import discord
 from discord.ext import commands
 
 from app.ui.embeds import error_embed, success_embed
-from app.core.constants.colors import BLUE
-from app.core.constants.emojis import HAMMER, CROSS, LOGO
+from app.helpers.constants import BLUE
+from app.helpers.constants import HAMMER, CROSS, LOGO
 from app.helpers.logging import logger
 from app.ui.views.warningView import WarningViewer
 from app.ui.views.modlogView import Modlogs
 from app.ui.views.setup import Setup
-from app.services.database.queries import fetch_modlogs, fetch_warnings, mod_stats
+from app.database.queries import fetch_modlogs, fetch_warnings, mod_stats
 from app.helpers.time_converter import time_converter
 
 from datetime import datetime
@@ -301,7 +301,6 @@ class Management(commands.Cog):
             embed.add_field(name=action.capitalize(), value=str(count), inline=True)
 
         embed.set_thumbnail(url=mod.display_avatar.url)
-        embed.set_footer(text=datetime.now().strftime("Today at %H:%M"))
         await ctx.reply(embed=embed)
 
     @commands.command(

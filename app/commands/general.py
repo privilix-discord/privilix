@@ -3,8 +3,8 @@ from discord.ext import commands
 from datetime import datetime
 from app.helpers.logging import logger
 from app.ui.embeds import error_embed, success_embed
-from app.core.constants.colors import BLUE
-from app.core.constants.emojis import CHECK, CROSS, NEUTRAL
+from app.helpers.constants import BLUE
+from app.helpers.constants import CHECK, CROSS, NEUTRAL
 
 
 class General(commands.Cog):
@@ -21,8 +21,6 @@ class General(commands.Cog):
         embed = discord.Embed(color=BLUE)
         embed.set_author(name=f"{user.name}'s Avatar", icon_url=avatar.url)
         embed.set_image(url=avatar.url)
-
-        embed.set_footer(text=datetime.now().strftime("Today at %H:%M"))
 
         await ctx.reply(embed=embed, mention_author=False)
 
@@ -59,11 +57,10 @@ class General(commands.Cog):
     @commands.guild_only()
     async def _whois(self, ctx, user: discord.Member = None):
         member = user or ctx.author
-        now = datetime.now().strftime("Today at %H:%M")
         whois = discord.Embed(color=BLUE, description=member.mention)
         whois.set_author(name=member.name, icon_url=member.display_avatar.url)
         whois.set_thumbnail(url=member.display_avatar.url)
-        whois.set_footer(text=f"ID: {member.id} | {now}")
+        whois.set_footer(text=f"ID: {member.id}")
         joined = member.joined_at.strftime("%a, %b %d, %Y %I:%M %p")
         created = member.created_at.strftime("%a, %b %d, %Y %I:%M %p")
         whois.add_field(name="Joined", value=joined)
