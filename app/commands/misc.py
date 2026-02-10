@@ -117,7 +117,7 @@ class Misc(commands.Cog):
         link_btn = ui.Button(
             label="Invite",
             style=discord.ButtonStyle.link,
-            url="https://discord.com/oauth2/authorize?client_id=1133741199505760266&permissions=8&integration_type=0&scope=bot",
+            url=INVITE_LINK,
         )
         view.add_item(link_btn)
         embed = discord.Embed(
