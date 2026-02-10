@@ -11,9 +11,9 @@ class General(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="avatar", help="Get the avatar of a user.")
+    @commands.command(name="avatar", help="Get avatar of a user.")
     @commands.guild_only()
-    async def _avatar(self, ctx, user: discord.Member = None):
+    async def _avatar(self, ctx, user: discord.Member | None = None) -> None:
         user = user or ctx.author
 
         avatar = user.display_avatar.replace(size=4096)
@@ -26,19 +26,22 @@ class General(commands.Cog):
 
     @commands.command(name="serverinfo", help="Get information about this server.")
     @commands.guild_only()
-    async def _serverinfo(self, ctx):
-        created = ctx.guild.created_at
+    async def _serverinfo(self, ctx: commands.Context) -> None:
+        guild = ctx.guild
+        assert guild is not None
+        created = guild.created_at
         ts = int(created.timestamp())
         relative = f"<t:{ts}:R>"
 
-        guild = ctx.guild
         info = discord.Embed(color=BLUE)
         if guild.icon:
             info.set_author(name=guild.name, icon_url=guild.icon.url)
             info.set_thumbnail(url=guild.icon.url)
         else:
             info.set_author(name=guild.name)
-        owner = await guild.fetch_member(guild.owner_id)
+        owner_id = guild.owner_id
+        assert owner_id is not None
+        owner = await guild.fetch_member(owner_id)
         info.add_field(name="Owned By ", value=str(owner.mention))
         info.add_field(name="Member Count", value=guild.member_count)
         info.add_field(
@@ -55,13 +58,17 @@ class General(commands.Cog):
 
     @commands.command(name="whois", help="Get user information.")
     @commands.guild_only()
-    async def _whois(self, ctx, user: discord.Member = None):
+    async def _whois(self, ctx, user: discord.Member | None = None) -> None:
         member = user or ctx.author
+        assert member is not None
         whois = discord.Embed(color=BLUE, description=member.mention)
         whois.set_author(name=member.name, icon_url=member.display_avatar.url)
         whois.set_thumbnail(url=member.display_avatar.url)
         whois.set_footer(text=f"ID: {member.id}")
-        joined = member.joined_at.strftime("%a, %b %d, %Y %I:%M %p")
+        if member.joined_at is not None:
+            joined = member.joined_at.strftime("%a, %b %d, %Y %I:%M %p")
+        else:
+            joined = "Unknown"
         created = member.created_at.strftime("%a, %b %d, %Y %I:%M %p")
         whois.add_field(name="Joined", value=joined)
         whois.add_field(name="Registered", value=created)
@@ -100,9 +107,9 @@ class General(commands.Cog):
 
         await ctx.reply(embed=whois, mention_author=False)
 
-    @commands.command(name="suggest", help="Give a suggestion for this server.")
+    @commands.command(name="suggest", help="Give your suggestion for this server.")
     @commands.guild_only()
-    async def _suggest(self, ctx, *, suggestion: str):
+    async def _suggest(self, ctx, *, suggestion: str) -> None:
         suggestion_id = self.bot.guild_settings_cache[ctx.guild.id][
             "suggestion_channelid"
         ]

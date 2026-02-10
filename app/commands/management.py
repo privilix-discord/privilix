@@ -11,8 +11,6 @@ from app.ui.views.setup import Setup
 from app.database.queries import fetch_modlogs, fetch_warnings, mod_stats
 from app.helpers.time_converter import time_converter
 
-from datetime import datetime
-from typing import Optional
 import asyncio
 
 
@@ -25,7 +23,7 @@ class Management(commands.Cog):
     )
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    async def setup(self, ctx: commands.Context):
+    async def setup(self, ctx: commands.Context) -> None:
         embed = discord.Embed(
             color=BLUE,
             title=f"{LOGO} Thank you for choosing Privilix",
@@ -42,12 +40,15 @@ class Management(commands.Cog):
     async def _setnick(
         self,
         ctx,
-        user: discord.Member,
+        user: discord.Member | None,
         *,
         nickname: str,
-    ):
+    ) -> None:
+        user = user or ctx.author
         if not ctx.guild.me.guild_permissions.manage_nicknames:
-            await ctx.reply(embed=e("Missing permission to manage nicknames."))
+            await ctx.reply(
+                embed=error_embed("Missing permission to manage nicknames.")
+            )
             return
 
         try:
@@ -60,13 +61,13 @@ class Management(commands.Cog):
                 )
             )
         except Exception as e:
-            logger.Error(f"Nickname command failed: {e}")
+            logger.error(f"Nickname command failed: {e}")
             await ctx.reply(embed=error_embed("Something went wrong."))
 
     @commands.command(name="warnings", help="Get complete warning history for a user.")
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
-    async def _warnings(self, ctx, member: discord.Member):
+    async def _warnings(self, ctx, member: discord.Member) -> None:
         warnings = await fetch_warnings(ctx.guild.id, member.id)
 
         if not warnings:
@@ -82,7 +83,7 @@ class Management(commands.Cog):
     @commands.has_permissions(
         ban_members=True, kick_members=True, moderate_members=True, manage_messages=True
     )
-    async def _modlogs(self, ctx, member: discord.Member):
+    async def _modlogs(self, ctx, member: discord.Member) -> None:
         modlogs = await fetch_modlogs(ctx.guild.id, member.id)
 
         if not modlogs:
@@ -100,8 +101,8 @@ class Management(commands.Cog):
         self,
         ctx: commands.Context,
         time: str,
-        channel: Optional[discord.TextChannel] = None,
-    ):
+        channel: discord.TextChannel | None = None,
+    ) -> None:
         seconds = time_converter(time)
         if seconds == None or seconds == 0:
             await ctx.reply(
@@ -118,6 +119,7 @@ class Management(commands.Cog):
             )
             return
 
+        assert isinstance(ctx.channel, discord.TextChannel)
         channel = channel or ctx.channel
         try:
             await channel.edit(slowmode_delay=seconds)
@@ -142,25 +144,25 @@ class Management(commands.Cog):
         role: discord.Role,
         *,
         reason: str = "No reason provided",
-    ):
-        if not ctx.guild.me.guild_permissions.manage_roles:
+    ) -> None:
+        guild = ctx.guild
+        assert guild is not None
+        assert isinstance(ctx.author, discord.Member)
+        if not guild.me.guild_permissions.manage_roles:
             await ctx.reply(
                 embed=error_embed("Missing permission to manage roles."),
                 mention_author=False,
             )
             return
 
-        if role.position >= ctx.guild.me.top_role.position:
+        if role.position >= guild.me.top_role.position:
             await ctx.reply(
                 embed=error_embed("That role is higher than my highest role."),
                 mention_author=False,
             )
             return
 
-        if (
-            target.top_role >= ctx.author.top_role
-            and ctx.author.id != ctx.guild.owner_id
-        ):
+        if target.top_role >= ctx.author.top_role and ctx.author.id != guild.owner_id:
             await ctx.reply(
                 embed=error_embed("You can’t modify roles for this member."),
                 mention_author=False,
@@ -169,7 +171,7 @@ class Management(commands.Cog):
 
         if (
             role.position >= ctx.author.top_role.position
-            and ctx.author.id != ctx.guild.owner_id
+            and ctx.author.id != guild.owner_id
         ):
             await ctx.reply(
                 embed=error_embed("You can’t assign a role higher than your own."),
@@ -211,7 +213,9 @@ class Management(commands.Cog):
         role: discord.Role,
         *,
         reason: str = "No reason provided",
-    ):
+    ) -> None:
+        assert ctx.guild is not None
+        assert isinstance(ctx.author, discord.Member)
         if not ctx.guild.me.guild_permissions.manage_roles:
             await ctx.reply(
                 embed=error_embed("Missing permission to manage roles."),
@@ -274,8 +278,10 @@ class Management(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(view_audit_log=True)
     async def _modstats(
-        self, ctx: commands.Context, mod: Optional[discord.Member] = None
-    ):
+        self, ctx: commands.Context, mod: discord.Member | None = None
+    ) -> None:
+        assert isinstance(ctx.author, discord.Member)
+        assert ctx.guild is not None
         mod = mod or ctx.author
         stats = await mod_stats(ctx.guild.id, mod.id)
 
@@ -310,7 +316,10 @@ class Management(commands.Cog):
     )
     @commands.guild_only()
     @commands.has_permissions(manage_roles=True)
-    async def _massrole(self, ctx: commands.Context, action: str, role: discord.Role):
+    async def _massrole(
+        self, ctx: commands.Context, action: str, role: discord.Role
+    ) -> None:
+        assert ctx.guild is not None
         if not ctx.guild.me.guild_permissions.manage_roles:
             await ctx.reply(
                 embed=error_embed("Missing permission to manage roles."),

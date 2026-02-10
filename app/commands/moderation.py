@@ -23,7 +23,9 @@ class Moderation(commands.Cog):
         target: discord.Member,
         *,
         reason: str = "No reason provided",
-    ):
+    ) -> None:
+        assert ctx.guild is not None
+        assert isinstance(ctx.author, discord.Member)
         if not ctx.guild.me.guild_permissions.kick_members:
             await ctx.reply(
                 embed=error_embed("Missing permission to remove members."),
@@ -59,6 +61,7 @@ class Moderation(commands.Cog):
             log_id = self.bot.guild_settings_cache[ctx.guild.id]["modlogs_channelid"]
             if log_id:
                 log_channel = await ctx.guild.fetch_channel(int(log_id))
+                assert isinstance(log_channel, discord.TextChannel)
                 await log_channel.send(
                     embed=log_embed(target, ctx.author, "kick", reason)
                 )
@@ -78,7 +81,9 @@ class Moderation(commands.Cog):
         target: discord.Member,
         *,
         reason: str = "No reason provided",
-    ):
+    ) -> None:
+        assert ctx.guild is not None
+        assert isinstance(ctx.author, discord.Member)
         if not ctx.guild.me.guild_permissions.ban_members:
             await ctx.reply(
                 embed=error_embed("Missing permission to ban members."),
@@ -98,6 +103,7 @@ class Moderation(commands.Cog):
             log_id = self.bot.guild_settings_cache[ctx.guild.id]["modlogs_channelid"]
             if log_id:
                 log_channel = await ctx.guild.fetch_channel(int(log_id))
+                assert isinstance(log_channel, discord.TextChannel)
                 await log_channel.send(
                     embed=log_embed(target, ctx.author, "ban", reason)
                 )
@@ -113,10 +119,11 @@ class Moderation(commands.Cog):
                 if chnl_id:
                     appeal_view = AppealDMView(self.bot, ctx.guild.id, case_id, "ban")
 
-                await target.send(
-                    embed=dm_embed(ctx.guild, "You were banned", "ban", reason),
-                    view=appeal_view,
-                )
+                    if appeal_view is not None:
+                        await target.send(
+                            embed=dm_embed(ctx.guild, "You were banned", "ban", reason),
+                            view=appeal_view,
+                        )
             except Exception as e:
                 logger.error(f"Ban DM failed: {e}")
                 embed.add_field(name="Notice", value="The user did not receive a DM.")
@@ -145,7 +152,9 @@ class Moderation(commands.Cog):
         user_id: str,
         *,
         reason: str = "No reason provided",
-    ):
+    ) -> None:
+        assert ctx.guild is not None
+        assert isinstance(ctx.author, discord.Member)
         if not ctx.guild.me.guild_permissions.ban_members:
             await ctx.reply(
                 embed=error_embed("Missing permission to unban members."),
@@ -153,7 +162,7 @@ class Moderation(commands.Cog):
             return
 
         try:
-            user_id = int(user_id)
+            uid = int(user_id)
         except ValueError:
             await ctx.reply(
                 embed=error_embed("Invalid User Id"),
@@ -161,7 +170,7 @@ class Moderation(commands.Cog):
             return
 
         try:
-            user = await ctx.bot.fetch_user(user_id)
+            user = await ctx.bot.fetch_user(uid)
             await ctx.guild.unban(user, reason=f"@{ctx.author.name}: {reason}")
         except Exception as e:
             logger.error(f"Unban command failed: {e}")
@@ -184,10 +193,11 @@ class Moderation(commands.Cog):
             log_id = self.bot.guild_settings_cache[ctx.guild.id]["modlogs_channelid"]
             if log_id:
                 log_channel = await ctx.guild.fetch_channel(int(log_id))
+                assert isinstance(log_channel, discord.TextChannel)
                 await log_channel.send(
                     embed=log_embed(user, ctx.author, "unban", reason)
                 )
-            await insert_modlog(ctx.guild.id, user_id, ctx.author.id, "unban", reason)
+            await insert_modlog(ctx.guild.id, uid, ctx.author.id, "unban", reason)
         except Exception as e:
             logger.error(f"Log failed: {e}")
 
@@ -205,7 +215,9 @@ class Moderation(commands.Cog):
         duration: str,
         *,
         reason: str = "No reason provided",
-    ):
+    ) -> None:
+        assert ctx.guild is not None
+        assert isinstance(ctx.author, discord.Member)
         if not ctx.guild.me.guild_permissions.moderate_members:
             await ctx.reply(
                 embed=error_embed("Missing permission to manage timeouts."),
@@ -256,6 +268,7 @@ class Moderation(commands.Cog):
             log_id = self.bot.guild_settings_cache[ctx.guild.id]["modlogs_channelid"]
             if log_id:
                 log_channel = await ctx.guild.fetch_channel(int(log_id))
+                assert isinstance(log_channel, discord.TextChannel)
                 lembed = log_embed(target, ctx.author, "timeout", reason)
                 lembed.add_field(name="Duration", value=delta)
                 await log_channel.send(embed=lembed)
@@ -276,6 +289,8 @@ class Moderation(commands.Cog):
         *,
         reason: str = "No reason provided.",
     ):
+        assert ctx.guild is not None
+        assert isinstance(ctx.author, discord.Member)
         if not ctx.guild.me.guild_permissions.manage_messages:
             await ctx.reply(
                 embed=error_embed("Missing permission to manage warnings."),
@@ -308,16 +323,20 @@ class Moderation(commands.Cog):
                 appeal_view = None
                 if chnl_id:
                     appeal_view = AppealDMView(self.bot, ctx.guild.id, case_id, "warn")
-                await target.send(
-                    embed=dm_embed(ctx.guild, "You were warned", "warn", reason),
-                    view=appeal_view,
-                )
+                    if appeal_view is not None:
+                        await target.send(
+                            embed=dm_embed(
+                                ctx.guild, "You were warned", "warn", reason
+                            ),
+                            view=appeal_view,
+                        )
             except Exception as e:
                 logger.error(f"warn dm failed {e}")
                 embed.add_field(name="Notice", value="The user did not receive a DM.")
             log_id = self.bot.guild_settings_cache[ctx.guild.id]["modlogs_channelid"]
             if log_id:
                 log_channel = await ctx.guild.fetch_channel(int(log_id))
+                assert isinstance(log_channel, discord.TextChannel)
                 await log_channel.send(
                     embed=log_embed(target, ctx.author, "warn", reason)
                 )
@@ -334,14 +353,16 @@ class Moderation(commands.Cog):
     async def _lock(
         self,
         ctx: commands.Context,
-        channel: discord.TextChannel = None,
+        channel: discord.TextChannel | None = None,
         *,
         reason="No reason provided.",
-    ):
+    ) -> None:
+        assert ctx.guild is not None
+        assert isinstance(ctx.author, discord.Member)
         if not ctx.guild.me.guild_permissions.manage_roles:
             await ctx.reply(embed=error_embed("Missing permissions to manage roles."))
             return
-
+        assert isinstance(ctx.channel, discord.TextChannel)
         channel = channel or ctx.channel
         overwrite = channel.overwrites_for(ctx.guild.default_role)
 
@@ -380,14 +401,17 @@ class Moderation(commands.Cog):
     async def _unlock(
         self,
         ctx: commands.Context,
-        channel: discord.TextChannel = None,
+        channel: discord.TextChannel | None = None,
         *,
         reason="No reason provided.",
     ):
+        assert ctx.guild is not None
+        assert isinstance(ctx.author, discord.Member)
         if not ctx.guild.me.guild_permissions.manage_roles:
             await ctx.reply(embed=error_embed("Missing permissions to manage roles."))
             return
 
+        assert isinstance(ctx.channel, discord.TextChannel)
         channel = channel or ctx.channel
         overwrite = channel.overwrites_for(ctx.guild.default_role)
 
@@ -427,7 +451,10 @@ class Moderation(commands.Cog):
     )
     @commands.guild_only()
     @commands.has_permissions(manage_messages=True)
-    async def _clear(self, ctx, count: int):
+    async def _clear(self, ctx: commands.Context, count: int) -> None:
+        assert ctx.guild is not None
+        assert isinstance(ctx.author, discord.Member)
+        assert isinstance(ctx.channel, discord.TextChannel)
         if not ctx.guild.me.guild_permissions.manage_messages:
             await ctx.reply(embed=error_embed("Missing permission to manage messages."))
             return
