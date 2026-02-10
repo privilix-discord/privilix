@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from app.helpers.constants import BLUE
 from app.helpers.logging import logger
 from app.database.queries import (
     set_prefix,
@@ -17,7 +18,7 @@ class Admin(commands.Cog):
     @commands.command(name="prefix", help="Change bot prefix for server.")
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    async def _set_prefix(self, ctx, *, prefix: str):
+    async def _set_prefix(self, ctx, *, prefix: str) -> None:
         if len(prefix) > 5:
             await ctx.reply(
                 embed=error_embed("Prefix cannot have more than 5 characters")
@@ -37,7 +38,7 @@ class Admin(commands.Cog):
     @commands.command(name="setmodlogs", help="Set a channel to receive modlogs.")
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    async def _setmodlogchan(self, ctx, channel: discord.TextChannel):
+    async def _setmodlogchan(self, ctx, channel: discord.TextChannel | None) -> None:
         channel = channel or ctx.channel
 
         try:
@@ -59,7 +60,9 @@ class Admin(commands.Cog):
     )
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
-    async def _setsuggestionchan(self, ctx, channel: discord.TextChannel = None):
+    async def _setsuggestionchan(
+        self, ctx, channel: discord.TextChannel | None
+    ) -> None:
         channel = channel or ctx.channel
 
         try:
@@ -81,14 +84,16 @@ class Admin(commands.Cog):
     @commands.guild_only()
     @commands.has_permissions(manage_guild=True)
     async def _appealer(
-        self, ctx: commands.context, channel: discord.TextChannel = None
-    ):
+        self, ctx: commands.Context, channel: discord.TextChannel | None = None
+    ) -> None:
+        assert isinstance(ctx.channel, discord.TextChannel)
         channel = channel or ctx.channel
+        assert channel is not None
+        guild = ctx.guild
+        assert guild is not None
         try:
-            await set_appeal_channel(ctx.guild.id, channel.id)
-            self.bot.guild_settings_cache[ctx.guild.id]["appeals_channelid"] = (
-                channel.id
-            )
+            await set_appeal_channel(guild.id, channel.id)
+            self.bot.guild_settings_cache[guild.id]["appeals_channelid"] = channel.id
             await ctx.reply(
                 embed=success_embed(
                     f"Appeal submissions channel set to {channel.mention}"
@@ -101,9 +106,10 @@ class Admin(commands.Cog):
     @commands.command(name="say", help="Say something via Privilix.")
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    async def _say(self, ctx, *, message: str):
+    async def _say(self, ctx, *, message: str) -> None:
         await ctx.message.delete()
-        await ctx.send(message)
+        embed = discord.Embed(color=BLUE, description=message)
+        await ctx.send(embed=embed)
 
 
 async def setup(bot):
