@@ -5,6 +5,7 @@
 ![alt text](https://img.shields.io/badge/python-3.12+-blue.svg)
 ![alt text](https://img.shields.io/badge/discord.py-2.6.4-7289DA.svg)
 ![alt text](https://img.shields.io/badge/dependency_management-Poetry-60A5FA.svg)
+<br>
 Handle mistakes in one tap. Ban appeals, clean logs, simple controls, and zero clutter. Privilix keeps your server running smoothly without turning moderation into a chore.
 
 ## 🛠️ Tech Stack
