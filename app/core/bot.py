@@ -32,7 +32,6 @@ class Privilix(commands.Bot):
             self.guild_settings_cache[guild_id] = {
                 "language": row.language,
                 "modlogs_channelid": row.modlog_channelid,
-                "suggestion_channelid": row.suggestion_channelid,
                 "appeals_channelid": row.appeal_channelid,
             }
         logger.info(f"Cached {len(self.prefix_cache)} guild configs")
