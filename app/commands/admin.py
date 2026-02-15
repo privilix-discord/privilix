@@ -54,7 +54,6 @@ class Admin(commands.Cog):
             logger.error(f"Set mod log failed: {e}")
             await ctx.reply(embed=error_embed("Something went wrong."))
 
-
     @commands.command(
         name="setappeals", help="Set a channel to receive appeal submissions."
     )
