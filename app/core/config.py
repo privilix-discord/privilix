@@ -13,4 +13,4 @@ class Config(BaseSettings):
     )
 
 
-config = Config() # pyright: ignore[reportCallIssue]
+config = Config()  # pyright: ignore[reportCallIssue]
